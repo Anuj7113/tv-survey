@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>CableTV Complaint System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- For demo/testing CDN is fine; for production use Tailwind CLI build -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
@@ -37,6 +38,7 @@
         const select = document.getElementById('customerSelect');
         select.innerHTML = '<option value="">Loading customers...</option>';
         try {
+            // Use YOUR sheet's ID here
             const res = await fetch('https://docs.google.com/spreadsheets/d/1JJTkkRTge4UGcAL3cUjliADULR_Cgj5Sc_S1j9Ou7S8/gviz/tq?tqx=out:json');
             const text = await res.text();
             const match = text.match(/(?<=\().*(?=\);)/s);
@@ -48,8 +50,13 @@
             const rows = json.table.rows;
             select.innerHTML = '<option value="">Select a customer</option>';
             for(let idx = 0; idx < rows.length; idx++) {
-                // Skip header row if present
-                if(idx === 0 && rows[0].c[0] && rows[0].c[0].v && rows[0].c[0].v.toLowerCase().includes('stb')) continue;
+                // Only skip header if the cell contains a string "stb"
+                if (
+                    idx === 0 &&
+                    rows[0].c[0] &&
+                    typeof rows[0].c[0].v === 'string' &&
+                    rows[0].c[0].v.toLowerCase().includes('stb')
+                ) continue;
                 const row = rows[idx];
                 if(!row.c) continue;
                 const stb = row.c[0] && row.c[0].v ? row.c[0].v : '';
@@ -77,9 +84,9 @@
         const select = document.getElementById('customerSelect');
         select.addEventListener('change', function() {
             const selected = this.options[this.selectedIndex];
-            document.getElementById('stbNumber').value = selected.dataset.stb || "";
-            document.getElementById('customerAddress').value = selected.dataset.address || "";
-            document.getElementById('customerLocation').value = selected.dataset.gps || "";
+            document.getElementById('stbNumber').value = selected && selected.dataset.stb ? selected.dataset.stb : "";
+            document.getElementById('customerAddress').value = selected && selected.dataset.address ? selected.dataset.address : "";
+            document.getElementById('customerLocation').value = selected && selected.dataset.gps ? selected.dataset.gps : "";
         });
     });
     </script>
