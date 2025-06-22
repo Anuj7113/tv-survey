@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>CableTV Complaint System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- For demo/testing use CDN; for production, use PostCSS or CLI build -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
@@ -47,14 +46,21 @@
             const rows = json.table.rows;
             select.innerHTML = '<option value="">Select a customer</option>';
             for(let idx = 0; idx < rows.length; idx++) {
-                // Only skip header if it is actually a string and matches "stb"
+                const row = rows[idx];
+                // Defensive: log cell for debugging
+                const firstCell = row && row.c && row.c[0] ? row.c[0].v : undefined;
+                if (idx === 0) {
+                    // Log what the header cell actually is
+                    console.log('Header cell:', firstCell, 'Type:', typeof firstCell);
+                }
+                // Skip header only if cell is a string and includes stb
                 if (
                     idx === 0 &&
-                    rows[0].c[0] &&
-                    typeof rows[0].c[0].v === 'string' &&
-                    rows[0].c[0].v.trim().toLowerCase().includes('stb')
-                ) continue;
-                const row = rows[idx];
+                    typeof firstCell === "string" &&
+                    firstCell.trim().toLowerCase().includes("stb")
+                ) {
+                    continue;
+                }
                 if(!row.c) continue;
                 const stb = row.c[0] && row.c[0].v !== undefined ? row.c[0].v : '';
                 const name = row.c[1] && row.c[1].v ? row.c[1].v : '';
